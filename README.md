@@ -1,1 +1,1 @@
-# SDK
+celestial-sdk
