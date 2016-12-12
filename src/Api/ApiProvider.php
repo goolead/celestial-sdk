@@ -104,7 +104,7 @@ class ApiProvider implements ApiProviderContract
      */
     public function request(string $method, string $url, array $params = [])
     {
-        if (is_null($this->url) || is_null($this->token)) {
+        if (is_null($this->baseUri) || is_null($this->token)) {
             return $this->dummyResponse();
         }
 

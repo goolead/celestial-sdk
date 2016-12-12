@@ -19,7 +19,7 @@ class CelestialServiceProvider extends ServiceProvider
 
     protected function registerBillingService()
     {
-        $this->app->instance(BillingService::class, function ($app) {
+        $this->app->singleton(BillingService::class, function ($app) {
             $url = $app['config']->get('celestial.billing.url');
             $token = $app['config']->get('celestial.billing.token');
 
@@ -33,7 +33,7 @@ class CelestialServiceProvider extends ServiceProvider
 
     protected function registerPaymentsService()
     {
-        $this->app->instance(PaymentsService::class, function ($app) {
+        $this->app->singleton(PaymentsService::class, function ($app) {
             $url = $app['config']->get('celestial.payments.url');
             $token = $app['config']->get('celestial.payments.token');
 
