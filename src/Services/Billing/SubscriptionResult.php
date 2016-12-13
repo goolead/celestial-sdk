@@ -4,8 +4,9 @@ namespace Celestial\Services\Billing;
 
 use Celestial\Contracts\Services\Billing\SubscriptionResultContract;
 use Celestial\Contracts\Services\Payments\PaymentsServiceContract;
+use JsonSerializable;
 
-class SubscriptionResult implements SubscriptionResultContract
+class SubscriptionResult implements SubscriptionResultContract, JsonSerializable
 {
     const HTTP_PAYMENT_REQUIRED = 402;
 
@@ -31,6 +32,20 @@ class SubscriptionResult implements SubscriptionResultContract
     {
         $this->data = $data;
         $this->statusCode = $statusCode;
+    }
+
+    /**
+     * Возвращает данные для сериализации JSON.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'data' => $this->data,
+            'status_code' => $this->statusCode,
+            'payment_url' => $this->paymentUrl,
+        ];
     }
 
     /**

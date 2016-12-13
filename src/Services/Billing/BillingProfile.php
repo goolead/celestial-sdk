@@ -9,6 +9,8 @@ use Celestial\Contracts\Services\Payments\PaymentsServiceContract;
 
 class BillingProfile implements BillingProfileContract
 {
+    const HTTP_UNPROCESSABLE_ENTITY = 422;
+
     /**
      * @var \Celestial\Contracts\Api\ApiProviderContract
      */
@@ -262,6 +264,17 @@ class BillingProfile implements BillingProfileContract
             'form_params' => $form,
         ]);
 
+        $profileHasSubscription = true;
+
+        if ($response->statusCode() === static::HTTP_UNPROCESSABLE_ENTITY) {
+            // Профиль не подписан.
+            $profileHasSubscription = false;
+
+            $response = $this->api->request('POST', '/profiles/'.$this->profileId().'/subscription', [
+                'form_params' => $form,
+            ]);
+        }
+
         $subscriptionResult = new SubscriptionResult($response->response(), $response->statusCode());
 
         if ($subscriptionResult->subscriptionUpdated()) {
@@ -276,7 +289,7 @@ class BillingProfile implements BillingProfileContract
                 'service' => 'billing',
                 'service_token' => $this->api->token(),
                 'url' => $this->api->resolveUrl('/profiles/'.$this->profileId().'/subscription'),
-                'method' => 'PUT',
+                'method' => ($profileHasSubscription ? 'PUT' : 'POST'),
                 'form' => $form,
             ];
 
