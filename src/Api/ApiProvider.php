@@ -12,6 +12,8 @@ use Psr\Http\Message\ResponseInterface;
 
 class ApiProvider implements ApiProviderContract
 {
+    const HTTP_NOT_FOUND = 404;
+
     /**
      * @var string
      */

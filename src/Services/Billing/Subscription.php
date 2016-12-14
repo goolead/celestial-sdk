@@ -92,18 +92,18 @@ class Subscription implements SubscriptionContract
      *
      * @param string $feature
      * @param bool   $withBalance = false
-     * @param int    $amount      = 1
+     * @param int    $value       = 1
      *
      * @return bool
      */
-    public function canUseFeature(string $feature, bool $withBalance = false, int $amount = 1)
+    public function canUseFeature(string $feature, bool $withBalance = false, int $value = 1)
     {
         if ($this->isUnlimitedFeature($feature)) {
             return true;
         }
 
         $amountLeft = intval($this->data['features'][$feature]['left'] ?? 0);
-        $canUseWithinLimits = ($amountLeft - $amount) >= 0;
+        $canUseWithinLimits = ($amountLeft - $value) >= 0;
 
         if ($canUseWithinLimits === true) {
             return true;
@@ -119,6 +119,6 @@ class Subscription implements SubscriptionContract
             return true;
         }
 
-        return $this->balance >= ($price * $amount);
+        return $this->balance >= ($price * $value);
     }
 }

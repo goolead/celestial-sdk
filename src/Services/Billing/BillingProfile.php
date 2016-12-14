@@ -6,9 +6,14 @@ use Celestial\Contracts\Api\ApiProviderContract;
 use Celestial\Contracts\Services\Billing\BillingProfileContract;
 use Celestial\Contracts\Services\Payments\PaymentSessionContract;
 use Celestial\Contracts\Services\Payments\PaymentsServiceContract;
+use Celestial\Exceptions\Services\Billing\FeatureIsNotAvailableException;
+use Celestial\Exceptions\Services\Billing\NegativeBalanceLimitReachedException;
+use RuntimeException;
 
 class BillingProfile implements BillingProfileContract
 {
+    const HTTP_PAYMENT_REQUIRED = 402;
+    const HTTP_FORBIDDEN = 403;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
 
     /**
@@ -330,6 +335,43 @@ class BillingProfile implements BillingProfileContract
         }
 
         return $response->data();
+    }
+
+    /**
+     * Выполняет списание лимита конкретной возможности тарифного плата платежного профиля.
+     *
+     * @param string $feature
+     * @param int    $value   = 1
+     *
+     * @throws \Celestial\Exceptions\Services\Billing\NegativeBalanceLimitReachedException
+     * @throws \Celestial\Exceptions\Services\Billing\FeatureIsNotAvailableException
+     * @throws \RuntimeException
+     *
+     * @return \Celestial\Contracts\Services\Billing\BillingProfileContract
+     */
+    public function spendFeature(string $feature, int $value = 1)
+    {
+        $response = $this->api->request('DELETE', '/profiles/'.$this->profileId().'/subscription/features', [
+            'form_params' => [
+                'feature' => $feature,
+                'value' => $value,
+            ],
+        ]);
+
+        if ($response->failed()) {
+            switch ($response->statusCode()) {
+                case static::HTTP_PAYMENT_REQUIRED:
+                    throw new NegativeBalanceLimitReachedException('Unable to spend feature "'.$feature.'" because of negative balance.');
+                case static::HTTP_FORBIDDEN:
+                    throw new FeatureIsNotAvailableException('Your plan has no access to feature "'.$feature.'".');
+                default:
+                    throw new RuntimeException('Unable to spend feature "'.$feature.'": unknown error (HTTP Code: '.$response->statusCode().').');
+            }
+        }
+
+        $this->setProfileData($response->data()['profile'] ?? []);
+
+        return $this;
     }
 
     /**

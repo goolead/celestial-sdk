@@ -47,9 +47,9 @@ interface SubscriptionContract
      *
      * @param string $feature
      * @param bool   $withBalance = false
-     * @param int    $amount      = 1
+     * @param int    $value       = 1
      *
      * @return bool
      */
-    public function canUseFeature(string $feature, bool $withBalance = false, int $amount = 1);
+    public function canUseFeature(string $feature, bool $withBalance = false, int $value = 1);
 }

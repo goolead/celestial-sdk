@@ -1,5 +1,7 @@
 <?php
 
+use Celestial\Exceptions\Services\Billing\FeatureIsNotAvailableException;
+use Celestial\Exceptions\Services\Billing\NegativeBalanceLimitReachedException;
 use Celestial\Exceptions\Services\Billing\ProfileWasNotFoundException;
 use Celestial\Services\Billing\BillingService;
 use Celestial\Services\Payments\PaymentSession;
@@ -142,6 +144,78 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($subscription->canUseFeature('first'));
         $this->assertTrue($subscription->canUseFeature('first', $useBalance));
+    }
+
+    /** @test */
+    function profile_can_spend_features()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $profileRequest = $this->getProfileByIdRequest();
+            $spendFeatureRequest = $this->getSpendFeatureRequest();
+
+            $api->shouldReceive('request')
+                ->with($profileRequest['method'], $profileRequest['url'])
+                ->andReturn($profileRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($spendFeatureRequest['method'], $spendFeatureRequest['url'], $spendFeatureRequest['params'])
+                ->andReturn($spendFeatureRequest['response']);
+        });
+
+        $service = new BillingService($api);
+        $profile = $service->getProfileById(1);
+
+        $this->assertEquals(0, $profile->rawBalance());
+
+        $profile->spendFeature('first');
+
+        $this->assertEquals(-2000, $profile->rawBalance());
+    }
+
+    /** @test */
+    function exception_should_be_thrown_when_profile_plan_has_no_access_to_feature()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $profileRequest = $this->getProfileByIdRequest();
+            $spendFeatureRequest = $this->getSpendFeatureForbiddenRequest();
+
+            $api->shouldReceive('request')
+                ->with($profileRequest['method'], $profileRequest['url'])
+                ->andReturn($profileRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($spendFeatureRequest['method'], $spendFeatureRequest['url'], $spendFeatureRequest['params'])
+                ->andReturn($spendFeatureRequest['response']);
+        });
+
+        $service = new BillingService($api);
+        $profile = $service->getProfileById(1);
+
+        $this->expectException(FeatureIsNotAvailableException::class);
+        $profile->spendFeature('first');
+    }
+
+    /** @test */
+    function exception_should_be_thrown_when_profile_has_negative_balance_limit_reached()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $profileRequest = $this->getProfileByIdRequest();
+            $spendFeatureRequest = $this->getSpendFeaturePaymentRequriedRequest();
+
+            $api->shouldReceive('request')
+                ->with($profileRequest['method'], $profileRequest['url'])
+                ->andReturn($profileRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($spendFeatureRequest['method'], $spendFeatureRequest['url'], $spendFeatureRequest['params'])
+                ->andReturn($spendFeatureRequest['response']);
+        });
+
+        $service = new BillingService($api);
+        $profile = $service->getProfileById(1);
+
+        $this->expectException(NegativeBalanceLimitReachedException::class);
+        $profile->spendFeature('first');
     }
 
     /** @test */
@@ -723,6 +797,70 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                     'can_use' => 1,
                 ],
             ],
+        ];
+    }
+
+    public function getSpendFeatureRequest()
+    {
+        return [
+            'method' => 'DELETE',
+            'url' => '/profiles/1/subscription/features',
+            'params' => [
+                'form_params' => [
+                    'feature' => 'first',
+                    'value' => 1,
+                ],
+            ],
+            'response' => ServicesTestsHelper::toApiResponse([
+                'success' => 1,
+                'data' => [
+                    'feature' => [
+                        'id' => 1,
+                        'name' => 'first',
+                        'limit' => 0,
+                        'unlimited' => 0,
+                        'left' => 0,
+                        'can_use' => 0,
+                    ],
+                    'profile' => $this->profileData(['balance' => -2000])['data'],
+                ],
+            ]),
+        ];
+    }
+
+    public function getSpendFeaturePaymentRequriedRequest()
+    {
+        return [
+            'method' => 'DELETE',
+            'url' => '/profiles/1/subscription/features',
+            'params' => [
+                'form_params' => [
+                    'feature' => 'first',
+                    'value' => 1,
+                ],
+            ],
+            'response' => ServicesTestsHelper::toApiResponse([
+                'error' => 402,
+                'message' => 'You can not use feature "first" due to subscription limit and negative balance.',
+            ], 402),
+        ];
+    }
+
+    public function getSpendFeatureForbiddenRequest()
+    {
+        return [
+            'method' => 'DELETE',
+            'url' => '/profiles/1/subscription/features',
+            'params' => [
+                'form_params' => [
+                    'feature' => 'first',
+                    'value' => 1,
+                ],
+            ],
+            'response' => ServicesTestsHelper::toApiResponse([
+                'error' => 403,
+                'message' => 'Your plan has no access to feature "first".',
+            ], 403),
         ];
     }
 

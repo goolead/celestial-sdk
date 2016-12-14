@@ -145,4 +145,25 @@ interface BillingProfileContract
      * @return \Celestial\Contracts\Services\Billing\SubscriptionResultContract
      */
     public function subscribe(PaymentsServiceContract $payments, string $email, string $plan, string $period, bool $isTrial = false);
+
+    /**
+     * Запрашивает историю изменения баланса профиля.
+     *
+     * @param string $timezone = null
+     *
+     * @throws \BalanceHistoryRequestFailedException
+     *
+     * @return array
+     */
+    public function balanceHistory(string $timezone = null);
+
+    /**
+     * Выполняет списание лимита конкретной возможности тарифного плата платежного профиля.
+     *
+     * @param string $feature
+     * @param int    $value   = 1
+     *
+     * @return \Celestial\Contracts\Services\Billing\BillingProfileContract
+     */
+    public function spendFeature(string $feature, int $value = 1);
 }
