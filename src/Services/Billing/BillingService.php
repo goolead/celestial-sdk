@@ -3,13 +3,17 @@
 namespace Celestial\Services\Billing;
 
 use Celestial\Contracts\Services\Billing\BillingServiceContract;
+use Celestial\Contracts\Services\Webhooks\CreatesWebhooks;
 use Celestial\Exceptions\Services\Billing\ProfileWasNotCreatedException;
 use Celestial\Exceptions\Services\Billing\ProfileWasNotFoundException;
 use Celestial\Services\AbstractService;
+use Celestial\Services\Webhooks\Traits\Webhooks;
 use Illuminate\Support\Collection;
 
-class BillingService extends AbstractService implements BillingServiceContract
+class BillingService extends AbstractService implements BillingServiceContract, CreatesWebhooks
 {
+    use Webhooks;
+
     /**
      * Создает новый платежный профиль.
      *
