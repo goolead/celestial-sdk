@@ -286,6 +286,8 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse($subscriptionResult->subscriptionUpdated());
         $this->assertTrue($subscriptionResult->paymentRequired());
+        $this->assertEquals(150000, $subscriptionResult->requiredAmount());
+        $this->assertEquals('1500 руб.', $subscriptionResult->requiredAmountFormatted());
         $this->assertEquals('https://example.org/payment-form', $subscriptionResult->paymentUrl());
     }
 

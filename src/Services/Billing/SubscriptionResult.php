@@ -79,6 +79,16 @@ class SubscriptionResult implements SubscriptionResultContract, JsonSerializable
     }
 
     /**
+     * Возвращает форматированную сумму, на которую необходимо пополнить баланс для перехода на тариф.
+     *
+     * @return string | null
+     */
+    public function requiredAmountFormatted()
+    {
+        return $this->data['data']['required_formatted'] ?? null;
+    }
+
+    /**
      * Задает URL платежной формы.
      *
      * @param string $paymentUrl

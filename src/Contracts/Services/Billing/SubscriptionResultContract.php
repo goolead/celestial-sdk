@@ -28,6 +28,13 @@ interface SubscriptionResultContract
     public function requiredAmount(): int;
 
     /**
+     * Возвращает форматированную сумму, на которую необходимо пополнить баланс для перехода на тариф.
+     *
+     * @return string | null
+     */
+    public function requiredAmountFormatted();
+
+    /**
      * Задает URL платежной формы.
      *
      * @param string $paymentUrl
