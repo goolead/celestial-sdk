@@ -24,6 +24,11 @@ abstract class AbstractService
         return $this;
     }
 
+    public function getApiProvider()
+    {
+        return $this->api;
+    }
+
     /**
      * Проверяет корректность переданных данных.
      *
