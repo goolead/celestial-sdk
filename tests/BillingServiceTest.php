@@ -38,9 +38,9 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
     /** @test */
     function it_should_load_existed_profiles_by_profile_id()
     {
-        $request = $this->getProfileByIdRequest();
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $request = $this->getProfileByIdRequest();
 
-        $api = ServicesTestsHelper::mockApi(function ($api) use ($request) {
             $api->shouldReceive('request')
                 ->with($request['method'], $request['url'])
                 ->andReturn($request['response']);
@@ -59,9 +59,9 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
     /** @test */
     function it_should_load_existed_profiles_by_user_id()
     {
-        $request = $this->getProfileByUserIdRequest();
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $request = $this->getProfileByUserIdRequest();
 
-        $api = ServicesTestsHelper::mockApi(function ($api) use ($request) {
             $api->shouldReceive('request')
                 ->with($request['method'], $request['url'])
                 ->andReturn($request['response']);
@@ -80,9 +80,9 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
     /** @test */
     function it_should_throw_exception_when_profile_was_not_found()
     {
-        $request = $this->getWrongProfileByIdRequest();
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $request = $this->getWrongProfileByIdRequest();
 
-        $api = ServicesTestsHelper::mockApi(function ($api) use ($request) {
             $api->shouldReceive('request')
                 ->with($request['method'], $request['url'])
                 ->andReturn($request['response']);
@@ -245,6 +245,38 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
         $profile->subscribe($payments, 'john@example.org', 'other', 'monthly');
 
         $this->assertEquals('other', $profile->billingPlan());
+    }
+
+    /** @test */
+    function profile_can_subscribe_to_new_plan_with_explicit_ending_date()
+    {
+        $planEndsAt = '2017-01-01 00:00:00';
+
+        $api = ServicesTestsHelper::mockApi(function ($api) use ($planEndsAt) {
+            $profileRequest = $this->getProfileByIdRequest(['balance' => 150000]);
+            $subscriptionRequest = $this->getSubscriptionRequest($planEndsAt);
+
+            $api->shouldReceive('request')
+                ->with($profileRequest['method'], $profileRequest['url'])
+                ->andReturn($profileRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($subscriptionRequest['method'], $subscriptionRequest['url'], $subscriptionRequest['params'])
+                ->andReturn($subscriptionRequest['response']);
+        });
+
+        $service = new BillingService($api);
+
+        $profile = $service->getProfileById(1);
+
+        $this->assertEquals('free', $profile->billingPlan());
+
+        $payments = $this->paymentsMock();
+
+        $profile->subscribe($payments, 'john@example.org', 'other', 'monthly', false, $planEndsAt);
+
+        $this->assertEquals('other', $profile->billingPlan());
+        $this->assertEquals($planEndsAt, $profile->getSubscription()->endsAtRaw());
     }
 
     /** @test */
@@ -560,6 +592,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                     'plan' => 'simple',
                     'period' => 'monthly',
                     'trial' => 0,
+                    'ends_at' => null,
                 ],
             ],
             'response' => ServicesTestsHelper::toApiResponse($this->profileData()),
@@ -606,7 +639,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    protected function getSubscriptionRequest()
+    protected function getSubscriptionRequest($endsAt = null)
     {
         return [
             'method' => 'PUT',
@@ -616,6 +649,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                     'plan' => 'other',
                     'period' => 'monthly',
                     'trial' => 0,
+                    'ends_at' => $endsAt,
                 ],
             ],
             'response' => ServicesTestsHelper::toApiResponse([
@@ -624,12 +658,13 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                     'plan_id' => 2,
                     'plan_name' => 'other',
                     'plan_price' => 150000,
+                    'ends_at_raw' => $endsAt,
                 ])
             ]),
         ];
     }
 
-    protected function getInsufficientFundsSubscriptionRequest()
+    protected function getInsufficientFundsSubscriptionRequest($endsAt = null)
     {
         return [
             'method' => 'PUT',
@@ -639,6 +674,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                     'plan' => 'other',
                     'period' => 'monthly',
                     'trial' => 0,
+                    'ends_at' => $endsAt,
                 ],
             ],
             'response' => ServicesTestsHelper::toApiResponse([
@@ -653,7 +689,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    protected function getPaymentSessionInitRequest()
+    protected function getPaymentSessionInitRequest($endsAt = null)
     {
         return [
             'method' => 'POST',
@@ -677,6 +713,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                                 'plan' => 'other',
                                 'period' => 'monthly',
                                 'trial' => 0,
+                                'ends_at' => $endsAt,
                             ],
                         ],
                     ],
@@ -725,6 +762,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
         $planPeriod = $subscriptionParams['plan_period'] ?? 'monthly';
         $isTrial = intval($subscriptionParams['trial'] ?? 0);
         $planPrice = intval($subscriptionParams['plan_price'] ?? 0);
+        $endsAtRaw = $subscriptionParams['ends_at_raw'] ?? '2019-01-01 00:00:00';
 
         return [
             'id' => 1,
@@ -733,11 +771,8 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
             'period' => $planPeriod,
             'is_trial' => $isTrial,
             'is_grace' => 0,
-            'ends_at' => [
-                'date' => '2019-01-01 00:00:00.000000',
-                'timezone_type' => 3,
-                'timezone' => 'UTC',
-            ],
+            'ends_at' => '1 янв. 2019 г.',
+            'ends_at_raw' => $endsAtRaw,
             'grace' => [
                 'till' => null,
                 'plan_id' => 0,

@@ -38,6 +38,7 @@ class BillingService extends AbstractService implements BillingServiceContract, 
                 'plan' => $data['plan'] ?? '',
                 'period' => $data['period'] ?? '',
                 'trial' => intval($data['trial'] ?? 0),
+                'ends_at' => $data['ends_at'] ?? null,
             ],
         ]);
 

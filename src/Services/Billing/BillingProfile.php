@@ -5,7 +5,7 @@ namespace Celestial\Services\Billing;
 use Celestial\Contracts\Api\ApiProviderContract;
 use Celestial\Contracts\Services\Billing\BillingProfileContract;
 use Celestial\Contracts\Services\Payments\PaymentSessionContract;
-use Celestial\Contracts\Services\Payments\PaymentsServiceContract;
+use Celestial\Contracts\Services\Payments\PaymentsServiceContract as Payments;
 use Celestial\Exceptions\Services\Billing\FeatureIsNotAvailableException;
 use Celestial\Exceptions\Services\Billing\NegativeBalanceLimitReachedException;
 use RuntimeException;
@@ -252,17 +252,19 @@ class BillingProfile implements BillingProfileContract
      * @param string                                                         $plan
      * @param string                                                         $period
      * @param bool                                                           $isTrial  = false
+     * @param string                                                         $endsAt   = null
      *
      * @throws \Celestial\Exceptions\Services\Billing\SubscriptionRequestFailedException
      *
      * @return \Celestial\Contracts\Services\Billing\SubscriptionResultContract
      */
-    public function subscribe(PaymentsServiceContract $payments, string $email, string $plan, string $period, bool $isTrial = false)
+    public function subscribe(Payments $payments, string $email, string $plan, string $period, bool $isTrial = false, string $endsAt = null)
     {
         $form = [
             'plan' => $plan,
             'period' => $period,
             'trial' => $isTrial ? 1 : 0,
+            'ends_at' => $endsAt,
         ];
 
         $response = $this->api->request('PUT', '/profiles/'.$this->profileId().'/subscription', [

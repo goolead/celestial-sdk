@@ -121,4 +121,24 @@ class Subscription implements SubscriptionContract
 
         return $this->balance >= ($price * $value);
     }
+
+    /**
+     * Возвращает дату окончания подписки в человекочитаемом формате.
+     *
+     * @return string | null
+     */
+    public function endsAt()
+    {
+        return $this->data['end_at'] ?? null;
+    }
+
+    /**
+     * Возвращает дату окончания подписки в формате "YYYY-MM-DD HH:MM:SS".
+     *
+     * @return string | null
+     */
+    public function endsAtRaw()
+    {
+        return $this->data['ends_at_raw'] ?? null;
+    }
 }

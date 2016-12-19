@@ -52,4 +52,18 @@ interface SubscriptionContract
      * @return bool
      */
     public function canUseFeature(string $feature, bool $withBalance = false, int $value = 1);
+
+    /**
+     * Возвращает дату окончания подписки в человекочитаемом формате.
+     *
+     * @return string | null
+     */
+    public function endsAt();
+
+    /**
+     * Возвращает дату окончания подписки в формате "YYYY-MM-DD HH:MM:SS".
+     *
+     * @return string | null
+     */
+    public function endsAtRaw();
 }

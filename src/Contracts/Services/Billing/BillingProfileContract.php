@@ -2,7 +2,7 @@
 
 namespace Celestial\Contracts\Services\Billing;
 
-use Celestial\Contracts\Services\Payments\PaymentsServiceContract;
+use Celestial\Contracts\Services\Payments\PaymentsServiceContract as Payments;
 
 interface BillingProfileContract
 {
@@ -139,12 +139,13 @@ interface BillingProfileContract
      * @param string                                                         $plan
      * @param string                                                         $period
      * @param bool                                                           $isTrial  = false
+     * @param string                                                         $endsAt   = null
      *
      * @throws \Celestial\Exceptions\Services\Billing\SubscriptionRequestFailedException
      *
      * @return \Celestial\Contracts\Services\Billing\SubscriptionResultContract
      */
-    public function subscribe(PaymentsServiceContract $payments, string $email, string $plan, string $period, bool $isTrial = false);
+    public function subscribe(Payments $payments, string $email, string $plan, string $period, bool $isTrial = false, string $endsAt = null);
 
     /**
      * Запрашивает историю изменения баланса профиля.
