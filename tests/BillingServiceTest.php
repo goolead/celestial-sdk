@@ -248,9 +248,41 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    function profile_can_cancel_subscription()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $profileRequest = $this->getProfileByIdRequest(['balance' => 150000]);
+            $subscriptionRequest = $this->getSubscriptionRequest();
+            $cancellationRequest = $this->getSubscriptionCancellationRequest();
+
+            $api->shouldReceive('request')
+                ->with($profileRequest['method'], $profileRequest['url'])
+                ->andReturn($profileRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($subscriptionRequest['method'], $subscriptionRequest['url'], $subscriptionRequest['params'])
+                ->andReturn($subscriptionRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($cancellationRequest['method'], $cancellationRequest['url'])
+                ->andReturn($cancellationRequest['response']);
+        });
+
+        $service = new BillingService($api);
+        $profile = $service->getProfileById(1);
+
+        $payments = $this->paymentsMock();
+        $profile->subscribe($payments, 'john@example.org', 'other', 'monthly');
+
+        $this->assertTrue($profile->hasSubscription());
+        $this->assertTrue($profile->cancelSubscription());
+        $this->assertFalse($profile->hasSubscription());
+    }
+
+    /** @test */
     function profile_can_subscribe_to_new_plan_with_explicit_ending_date()
     {
-        $planEndsAt = '2017-01-01 00:00:00';
+        $planEndsAt = '2030-01-01 00:00:00';
 
         $api = ServicesTestsHelper::mockApi(function ($api) use ($planEndsAt) {
             $profileRequest = $this->getProfileByIdRequest(['balance' => 150000]);
@@ -664,6 +696,17 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
         ];
     }
 
+    protected function getSubscriptionCancellationRequest()
+    {
+        return [
+            'method' => 'DELETE',
+            'url' => '/profiles/1/subscription',
+            'response' => ServicesTestsHelper::toApiResponse([
+                'success' => 1,
+            ]),
+        ];
+    }
+
     protected function getInsufficientFundsSubscriptionRequest($endsAt = null)
     {
         return [
@@ -747,7 +790,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                 ],
                 'subscription' => $this->subscriptionData(),
                 'created_at' => [
-                    'date' => '2017-01-01 00:00:00.000000',
+                    'date' => '2030-01-01 00:00:00.000000',
                     'timezone_type' => 3,
                     'timezone' => 'UTC',
                 ],
@@ -762,7 +805,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
         $planPeriod = $subscriptionParams['plan_period'] ?? 'monthly';
         $isTrial = intval($subscriptionParams['trial'] ?? 0);
         $planPrice = intval($subscriptionParams['plan_price'] ?? 0);
-        $endsAtRaw = $subscriptionParams['ends_at_raw'] ?? '2019-01-01 00:00:00';
+        $endsAtRaw = $subscriptionParams['ends_at_raw'] ?? '2030-01-01 00:00:00';
 
         return [
             'id' => 1,
@@ -771,7 +814,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
             'period' => $planPeriod,
             'is_trial' => $isTrial,
             'is_grace' => 0,
-            'ends_at' => '1 янв. 2019 г.',
+            'ends_at' => '1 янв. 2030 г.',
             'ends_at_raw' => $endsAtRaw,
             'grace' => [
                 'till' => null,
@@ -943,8 +986,8 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                         'meta_data' => [
                             'plan' => 'other',
                         ],
-                        'created_at' => '2017-01-01 00:01:00',
-                        'updated_at' => '2017-01-01 00:01:00',
+                        'created_at' => '2030-01-01 00:01:00',
+                        'updated_at' => '2030-01-01 00:01:00',
                     ],
                     [
                         'id' => 1,
@@ -966,8 +1009,8 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                             'formatted' => '1500 руб.',
                         ],
                         'meta_data' => [],
-                        'created_at' => '2017-01-01 00:00:00',
-                        'updated_at' => '2017-01-01 00:00:00',
+                        'created_at' => '2030-01-01 00:00:00',
+                        'updated_at' => '2030-01-01 00:00:00',
                     ],
                 ],
             ]),

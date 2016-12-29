@@ -148,6 +148,13 @@ interface BillingProfileContract
     public function subscribe(Payments $payments, string $email, string $plan, string $period, bool $isTrial = false, string $endsAt = null);
 
     /**
+     * Выполняет отмену ранее созданной подписки.
+     *
+     * @return bool
+     */
+    public function cancelSubscription(): bool;
+
+    /**
      * Запрашивает историю изменения баланса профиля.
      *
      * @param string $timezone = null

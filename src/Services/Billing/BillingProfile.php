@@ -12,6 +12,7 @@ use RuntimeException;
 
 class BillingProfile implements BillingProfileContract
 {
+    const HTTP_OK = 200;
     const HTTP_PAYMENT_REQUIRED = 402;
     const HTTP_FORBIDDEN = 403;
     const HTTP_UNPROCESSABLE_ENTITY = 422;
@@ -310,6 +311,24 @@ class BillingProfile implements BillingProfileContract
         }
 
         return $subscriptionResult;
+    }
+
+    /**
+     * Выполняет отмену ранее созданной подписки.
+     *
+     * @return bool
+     */
+    public function cancelSubscription(): bool
+    {
+        $response = $this->api->request('DELETE', '/profiles/'.$this->profileId().'/subscription');
+
+        if ($response->statusCode() !== static::HTTP_OK) {
+            return false;
+        }
+
+        $this->setSubscriptionData([]);
+
+        return true;
     }
 
     /**
