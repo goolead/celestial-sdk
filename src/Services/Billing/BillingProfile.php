@@ -362,7 +362,8 @@ class BillingProfile implements BillingProfileContract
      * Выполняет списание лимита конкретной возможности тарифного плата платежного профиля.
      *
      * @param string $feature
-     * @param int    $value   = 1
+     * @param int    $value        = 1
+     * @param bool   $chargeTrials = true
      *
      * @throws \Celestial\Exceptions\Services\Billing\NegativeBalanceLimitReachedException
      * @throws \Celestial\Exceptions\Services\Billing\FeatureIsNotAvailableException
@@ -370,12 +371,13 @@ class BillingProfile implements BillingProfileContract
      *
      * @return \Celestial\Contracts\Services\Billing\BillingProfileContract
      */
-    public function spendFeature(string $feature, int $value = 1)
+    public function spendFeature(string $feature, int $value = 1, bool $chargeTrials = true)
     {
         $response = $this->api->request('DELETE', '/profiles/'.$this->profileId().'/subscription/features', [
             'form_params' => [
                 'feature' => $feature,
                 'value' => $value,
+                'charge_trials' => $chargeTrials ? 1 : 0,
             ],
         ]);
 

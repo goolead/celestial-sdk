@@ -169,9 +169,10 @@ interface BillingProfileContract
      * Выполняет списание лимита конкретной возможности тарифного плата платежного профиля.
      *
      * @param string $feature
-     * @param int    $value   = 1
+     * @param int    $value        = 1
+     * @param bool   $chargeTrials = true
      *
      * @return \Celestial\Contracts\Services\Billing\BillingProfileContract
      */
-    public function spendFeature(string $feature, int $value = 1);
+    public function spendFeature(string $feature, int $value = 1, bool $chargeTrials = true);
 }

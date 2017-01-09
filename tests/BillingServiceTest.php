@@ -889,6 +889,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                 'form_params' => [
                     'feature' => 'first',
                     'value' => 1,
+                    'charge_trials' => 1,
                 ],
             ],
             'response' => ServicesTestsHelper::toApiResponse([
@@ -917,6 +918,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                 'form_params' => [
                     'feature' => 'first',
                     'value' => 1,
+                    'charge_trials' => 1,
                 ],
             ],
             'response' => ServicesTestsHelper::toApiResponse([
@@ -935,6 +937,7 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                 'form_params' => [
                     'feature' => 'first',
                     'value' => 1,
+                    'charge_trials' => 1,
                 ],
             ],
             'response' => ServicesTestsHelper::toApiResponse([
