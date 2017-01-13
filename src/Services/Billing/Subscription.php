@@ -86,6 +86,22 @@ class Subscription implements SubscriptionContract
     }
 
     /**
+     * Остаток лимита по возможности тарифного плана.
+     *
+     * @param string $feature
+     *
+     * @return int
+     */
+    public function featureValue(string $feature): int
+    {
+        if (!$this->hasFeature($feature)) {
+            return 0;
+        }
+
+        return intval($this->data['features'][$feature]['left'] ?? 0);
+    }
+
+    /**
      * Проверяет, может ли профиль воспользоваться определенной возможностью тарифного плана.
      * Если $withBalance == true, будет проверена возможность использовать баланс профиля
      * для оплаты использования возможности.

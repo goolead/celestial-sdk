@@ -133,6 +133,8 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
 
         $subscription = $profile->getSubscription();
 
+        $this->assertEquals(5, $subscription->featureValue('third'));
+
         $this->assertTrue($subscription->hasFeature('first'));
         $this->assertTrue($subscription->hasFeature('second'));
 
@@ -857,6 +859,16 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                             'formatted' => '0 руб.',
                         ],
                     ],
+                    'third' => [
+                        'id' => 1,
+                        'name' => 'third',
+                        'limit' => 5,
+                        'unlimited' => 0,
+                        'excess_price' => [
+                            'raw' => 1200,
+                            'formatted' => '12 руб.',
+                        ],
+                    ],
                 ],
             ],
             'features' => [
@@ -874,6 +886,14 @@ class BillingServiceTest extends PHPUnit_Framework_TestCase
                     'limit' => -1,
                     'unlimited' => 1,
                     'left' => -1,
+                    'can_use' => 1,
+                ],
+                'third' => [
+                    'id' => 1,
+                    'name' => 'third',
+                    'limit' => 5,
+                    'unlimited' => 0,
+                    'left' => 5,
                     'can_use' => 1,
                 ],
             ],

@@ -41,6 +41,15 @@ interface SubscriptionContract
     public function isUnlimitedFeature(string $feature): bool;
 
     /**
+     * Остаток лимита по возможности тарифного плана.
+     *
+     * @param string $feature
+     *
+     * @return int
+     */
+    public function featureValue(string $feature): int;
+
+    /**
      * Проверяет, может ли профиль воспользоваться определенной возможностью тарифного плана.
      * Если $withBalance == true, будет проверена возможность использовать баланс профиля
      * для оплаты использования возможности.
