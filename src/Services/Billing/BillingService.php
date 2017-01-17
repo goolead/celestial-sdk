@@ -7,12 +7,18 @@ use Celestial\Contracts\Services\Webhooks\CreatesWebhooks;
 use Celestial\Exceptions\Services\Billing\ProfileWasNotCreatedException;
 use Celestial\Exceptions\Services\Billing\ProfileWasNotFoundException;
 use Celestial\Services\AbstractService;
+use Celestial\Services\Billing\Discounts\DiscountsManager;
 use Celestial\Services\Webhooks\Traits\Webhooks;
 use Illuminate\Support\Collection;
 
 class BillingService extends AbstractService implements BillingServiceContract, CreatesWebhooks
 {
     use Webhooks;
+
+    /**
+     * @var \Celestial\Contracts\Services\Billing\Discounts\DiscountsManagerContract
+     */
+    protected $discounts;
 
     /**
      * Создает новый платежный профиль.
@@ -124,5 +130,19 @@ class BillingService extends AbstractService implements BillingServiceContract, 
                 return $plan;
             })
             ->toArray();
+    }
+
+    /**
+     * Возвращает менеджер скидок.
+     *
+     * @return \Celestial\Contracts\Services\Billing\Discounts\DiscountsManagerContract
+     */
+    public function discounts()
+    {
+        if (!is_null($this->discounts)) {
+            return $this->discounts;
+        }
+
+        return $this->discounts = new DiscountsManager($this->api);
     }
 }

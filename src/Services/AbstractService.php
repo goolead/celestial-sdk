@@ -17,6 +17,11 @@ abstract class AbstractService
         $this->api = $api;
     }
 
+    /**
+     * @param \Celestial\Contracts\Api\ApiProviderContract $api
+     *
+     * @return \Celestial\Services\AbstractService
+     */
     public function setApiProvider(ApiProviderContract $api)
     {
         $this->api = $api;
@@ -24,6 +29,9 @@ abstract class AbstractService
         return $this;
     }
 
+    /**
+     * @return \Celestial\Contracts\Api\ApiProviderContract
+     */
     public function getApiProvider()
     {
         return $this->api;

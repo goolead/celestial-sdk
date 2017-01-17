@@ -37,4 +37,11 @@ interface BillingServiceContract
      * @return \Celestial\Services\Billing\BillingProfile
      */
     public function getProfileByUserId(int $userId);
+
+    /**
+     * Возвращает менеджер скидок.
+     *
+     * @return \Celestial\Contracts\Services\Billing\Discounts\DiscountsManagerContract
+     */
+    public function discounts();
 }
