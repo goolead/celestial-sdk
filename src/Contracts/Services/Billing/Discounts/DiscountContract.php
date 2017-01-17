@@ -50,4 +50,13 @@ interface DiscountContract
      * @return bool
      */
     public function applyTo(BillingProfileContract $profile, string $applyTill = null): bool;
+
+    /**
+     * Отвязывает скидку от переданного платежного профиля.
+     *
+     * @param \Celestial\Contracts\Services\Billing\BillingProfileContract $profile
+     *
+     * @return bool
+     */
+    public function detachFrom(BillingProfileContract $profile): bool;
 }

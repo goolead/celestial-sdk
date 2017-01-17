@@ -118,6 +118,49 @@ class DiscountsTest extends Requests
         }
     }
 
+    /** @test */
+    function discount_can_be_detached_from_billing_profile()
+    {
+        $discountData = [
+            'type' => 'fixed',
+            'discount_type' => 'percentage',
+            'entity_type' => 'feature',
+            'entity_id' => 1,
+            'value' => 5,
+        ];
+
+        $api = ServicesTestsHelper::mockApi(function ($api) use ($discountData) {
+            $getRequests = [
+                $this->getProfileByIdRequest(),
+                $this->getDetachDiscountRequest(1, 1),
+            ];
+
+            $requests = [
+                $this->getCreateDiscountRequest($discountData),
+                $this->getAttachDiscountRequest(1),
+            ];
+
+            foreach ($getRequests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'])
+                    ->andReturn($request['response']);
+            }
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $service = new BillingService($api);
+        $discount = $service->discounts()->create($discountData);
+        $profile = $service->getProfileById(1);
+
+        $this->assertTrue($discount->applyTo($profile));
+        $this->assertTrue($discount->detachFrom($profile));
+    }
+
     public function getAttachDiscountRequest($profileId)
     {
         return [
@@ -128,6 +171,17 @@ class DiscountsTest extends Requests
                     'discount_id' => 1,
                 ],
             ],
+            'response' => ServicesTestsHelper::toApiResponse([
+                'success' => 1,
+            ]),
+        ];
+    }
+
+    public function getDetachDiscountRequest($profileId, $discountId)
+    {
+        return [
+            'method' => 'DELETE',
+            'url' => '/profiles/'.$profileId.'/discounts/'.$discountId,
             'response' => ServicesTestsHelper::toApiResponse([
                 'success' => 1,
             ]),

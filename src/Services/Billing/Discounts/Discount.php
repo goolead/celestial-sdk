@@ -109,4 +109,18 @@ class Discount implements DiscountContract
 
         return true;
     }
+
+    /**
+     * Отвязывает скидку от переданного платежного профиля.
+     *
+     * @param \Celestial\Contracts\Services\Billing\BillingProfileContract $profile
+     *
+     * @return bool
+     */
+    public function detachFrom(BillingProfileContract $profile): bool
+    {
+        $response = $this->api->request('DELETE', '/profiles/'.$profile->profileId().'/discounts/'.$this->id());
+
+        return !$response->failed();
+    }
 }
