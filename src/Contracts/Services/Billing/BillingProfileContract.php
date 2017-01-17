@@ -175,4 +175,11 @@ interface BillingProfileContract
      * @return \Celestial\Contracts\Services\Billing\BillingProfileContract
      */
     public function spendFeature(string $feature, int $value = 1, bool $chargeTrials = true);
+
+    /**
+     * Возвращает список скидок, доступных текущему платежному профилю.
+     *
+     * @return array
+     */
+    public function discounts();
 }

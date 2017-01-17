@@ -8,6 +8,8 @@ use Celestial\Services\AbstractService;
 
 class DiscountsManager extends AbstractService implements DiscountsManagerContract
 {
+    use DiscountsList;
+
     /**
      * Создает новую скидку.
      *
@@ -57,5 +59,15 @@ class DiscountsManager extends AbstractService implements DiscountsManagerContra
         }
 
         return new Discount($this->api, $response->data());
+    }
+
+    /**
+     * Возвращает список всех скидок.
+     *
+     * @return array
+     */
+    public function get()
+    {
+        return $this->loadDiscountsFrom($this->api, '/discounts');
     }
 }

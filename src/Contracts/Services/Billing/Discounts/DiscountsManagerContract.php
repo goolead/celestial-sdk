@@ -14,4 +14,11 @@ interface DiscountsManagerContract
      * @return \Celestial\Contracts\Services\Billing\Discounts\DiscountContract
      */
     public function create(array $attributes, array $applyTo = [], string $activeTill = null);
+
+    /**
+     * Возвращает список всех скидок.
+     *
+     * @return array
+     */
+    public function get();
 }

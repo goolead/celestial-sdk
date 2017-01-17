@@ -37,6 +37,26 @@ class DiscountsTest extends Requests
     }
 
     /** @test */
+    function discounts_can_be_listed()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $request = $this->getListDiscountsRequest();
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'])
+                ->andReturn($request['response']);
+        });
+
+        $service = new BillingService($api);
+        $discounts = $service->discounts()->get();
+
+        foreach ($discounts as $discount) {
+            $this->assertInternalType('string', $discount->type());
+            $this->assertInternalType('integer', $discount->value());
+        }
+    }
+
+    /** @test */
     function discounts_can_be_applied_to_billing_profile()
     {
         $discountData = [
@@ -70,6 +90,32 @@ class DiscountsTest extends Requests
         $profile = $service->getProfileById(1);
 
         $this->assertTrue($discount->applyTo($profile));
+    }
+
+    /** @test */
+    function profile_discounts_can_be_listed()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $requests = [
+                $this->getProfileByIdRequest(),
+                $this->getProfileDiscountsRequest(1),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $service = new BillingService($api);
+        $profile = $service->getProfileById(1);
+        $discounts = $profile->discounts();
+
+        foreach ($discounts as $discount) {
+            $this->assertInternalType('string', $discount->type());
+            $this->assertInternalType('integer', $discount->value());
+        }
     }
 
     public function getAttachDiscountRequest($profileId)
@@ -125,6 +171,116 @@ class DiscountsTest extends Requests
                     'applied_to' => [],
                     'created_at' => '2017-01-17 20:40:00',
                     'updated_at' => '2017-01-17 20:40:00',
+                ],
+            ]),
+        ];
+    }
+
+    public function getListDiscountsRequest()
+    {
+        return [
+            'method' => 'GET',
+            'url' => '/discounts',
+            'response' => ServicesTestsHelper::toApiResponse([
+                'success' => 1,
+                'data' => [
+                    [
+                        'id' => 1,
+                        'type' => 'incremental',
+                        'discount_type' => 'percentage',
+                        'entity' => [
+                            'id' => 1,
+                            'type' => 'feature',
+                        ],
+                        'value' => 5,
+                        'max_value' => 15,
+                        'applied_to' => [],
+                        'created_at' => '2017-01-17 20:40:00',
+                        'updated_at' => '2017-01-17 20:40:00',
+                    ],
+                    [
+                        'id' => 2,
+                        'type' => 'fixed',
+                        'discount_type' => 'percentage',
+                        'entity' => [
+                            'id' => 2,
+                            'type' => 'feature',
+                        ],
+                        'value' => 5,
+                        'max_value' => 5,
+                        'applied_to' => [],
+                        'created_at' => '2017-01-17 20:40:00',
+                        'updated_at' => '2017-01-17 20:40:00',
+                    ],
+                    [
+                        'id' => 3,
+                        'type' => 'fixed',
+                        'discount_type' => 'amount',
+                        'entity' => [
+                            'id' => 3,
+                            'type' => 'feature',
+                        ],
+                        'value' => 1500,
+                        'max_value' => 1500,
+                        'applied_to' => [],
+                        'created_at' => '2017-01-17 20:40:00',
+                        'updated_at' => '2017-01-17 20:40:00',
+                    ],
+                ],
+            ]),
+        ];
+    }
+
+    public function getProfileDiscountsRequest($profileId)
+    {
+        return [
+            'method' => 'GET',
+            'url' => '/profiles/'.$profileId.'/discounts',
+            'response' => ServicesTestsHelper::toApiResponse([
+                'success' => 1,
+                'data' => [
+                    [
+                        'id' => 1,
+                        'type' => 'incremental',
+                        'discount_type' => 'percentage',
+                        'entity' => [
+                            'id' => 1,
+                            'type' => 'feature',
+                        ],
+                        'value' => 5,
+                        'max_value' => 15,
+                        'applied_to' => [],
+                        'created_at' => '2017-01-17 20:40:00',
+                        'updated_at' => '2017-01-17 20:40:00',
+                    ],
+                    [
+                        'id' => 2,
+                        'type' => 'fixed',
+                        'discount_type' => 'percentage',
+                        'entity' => [
+                            'id' => 2,
+                            'type' => 'feature',
+                        ],
+                        'value' => 5,
+                        'max_value' => 5,
+                        'applied_to' => [],
+                        'created_at' => '2017-01-17 20:40:00',
+                        'updated_at' => '2017-01-17 20:40:00',
+                    ],
+                    [
+                        'id' => 3,
+                        'type' => 'fixed',
+                        'discount_type' => 'amount',
+                        'entity' => [
+                            'id' => 3,
+                            'type' => 'feature',
+                        ],
+                        'value' => 1500,
+                        'max_value' => 1500,
+                        'applied_to' => [],
+                        'created_at' => '2017-01-17 20:40:00',
+                        'updated_at' => '2017-01-17 20:40:00',
+                    ],
                 ],
             ]),
         ];

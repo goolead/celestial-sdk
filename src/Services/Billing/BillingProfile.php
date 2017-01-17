@@ -8,10 +8,13 @@ use Celestial\Contracts\Services\Payments\PaymentSessionContract;
 use Celestial\Contracts\Services\Payments\PaymentsServiceContract as Payments;
 use Celestial\Exceptions\Services\Billing\FeatureIsNotAvailableException;
 use Celestial\Exceptions\Services\Billing\NegativeBalanceLimitReachedException;
+use Celestial\Services\Billing\Discounts\DiscountsList;
 use RuntimeException;
 
 class BillingProfile implements BillingProfileContract
 {
+    use DiscountsList;
+
     const HTTP_OK = 200;
     const HTTP_PAYMENT_REQUIRED = 402;
     const HTTP_FORBIDDEN = 403;
@@ -456,5 +459,15 @@ class BillingProfile implements BillingProfileContract
         ];
 
         $this->api->request('DELETE', '/users/'.$this->userId().'/payments', $params);
+    }
+
+    /**
+     * Возвращает список скидок, доступных текущему платежному профилю.
+     *
+     * @return array
+     */
+    public function discounts()
+    {
+        return $this->loadDiscountsFrom($this->api, '/profiles/'.$this->profileId().'/discounts');
     }
 }
