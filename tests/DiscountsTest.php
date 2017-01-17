@@ -57,6 +57,24 @@ class DiscountsTest extends Requests
     }
 
     /** @test */
+    function discount_can_be_found_by_id()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $request = $this->getDiscountByIdRequest(1);
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'])
+                ->andReturn($request['response']);
+        });
+
+        $service = new BillingService($api);
+        $discount = $service->discounts()->find(1);
+
+        $this->assertInternalType('string', $discount->type());
+        $this->assertInternalType('integer', $discount->value());
+    }
+
+    /** @test */
     function discounts_can_be_applied_to_billing_profile()
     {
         $discountData = [
@@ -280,6 +298,31 @@ class DiscountsTest extends Requests
                         'created_at' => '2017-01-17 20:40:00',
                         'updated_at' => '2017-01-17 20:40:00',
                     ],
+                ],
+            ]),
+        ];
+    }
+
+    public function getDiscountByIdRequest($discountId)
+    {
+        return [
+            'method' => 'GET',
+            'url' => '/discounts/'.$discountId,
+            'response' => ServicesTestsHelper::toApiResponse([
+                'success' => 1,
+                'data' => [
+                    'id' => 1,
+                    'type' => 'incremental',
+                    'discount_type' => 'percentage',
+                    'entity' => [
+                        'id' => 1,
+                        'type' => 'feature',
+                    ],
+                    'value' => 5,
+                    'max_value' => 15,
+                    'applied_to' => [],
+                    'created_at' => '2017-01-17 20:40:00',
+                    'updated_at' => '2017-01-17 20:40:00',
                 ],
             ]),
         ];

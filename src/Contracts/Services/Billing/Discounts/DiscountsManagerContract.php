@@ -21,4 +21,13 @@ interface DiscountsManagerContract
      * @return array
      */
     public function get();
+
+    /**
+     * Выполняет поиск скидки по ID.
+     *
+     * @param int $id
+     *
+     * @return \Celestial\Contracts\Services\Billing\Discounts\DiscountContract|null
+     */
+    public function find(int $id);
 }

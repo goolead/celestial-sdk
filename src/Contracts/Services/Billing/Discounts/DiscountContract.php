@@ -42,6 +42,13 @@ interface DiscountContract
     public function maxValue(): int;
 
     /**
+     * Возвращает данные скидки.
+     *
+     * @return array
+     */
+    public function getData(): array;
+
+    /**
      * Применяет скидку к переданному платежному профилю.
      *
      * @param \Celestial\Contracts\Services\Billing\BillingProfileContract $profile

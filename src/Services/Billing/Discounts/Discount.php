@@ -80,6 +80,16 @@ class Discount implements DiscountContract
     }
 
     /**
+     * Возвращает данные скидки.
+     *
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
      * Применяет скидку к переданному платежному профилю.
      *
      * @param \Celestial\Contracts\Services\Billing\BillingProfileContract $profile

@@ -70,4 +70,22 @@ class DiscountsManager extends AbstractService implements DiscountsManagerContra
     {
         return $this->loadDiscountsFrom($this->api, '/discounts');
     }
+
+    /**
+     * Выполняет поиск скидки по ID.
+     *
+     * @param int $id
+     *
+     * @return \Celestial\Contracts\Services\Billing\Discounts\DiscountContract|null
+     */
+    public function find(int $discountId)
+    {
+        $request = $this->api->request('GET', '/discounts/'.$discountId);
+
+        if ($request->failed()) {
+            return;
+        }
+
+        return new Discount($this->api, $request->data());
+    }
 }
