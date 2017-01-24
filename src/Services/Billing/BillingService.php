@@ -76,6 +76,30 @@ class BillingService extends AbstractService implements BillingServiceContract, 
     }
 
     /**
+     * Загружает несколько профилей по их ID.
+     *
+     * @param array $ids
+     *
+     * @throws \Celestial\Exceptions\Services\Billing\ProfileWasNotFoundException
+     *
+     * @return array
+     */
+    public function getProfilesByIds(array $ids)
+    {
+        $response = $this->api->request('GET', '/profiles', [
+            'query' => [
+                'ids' => $this->transformArrayToIdsList($ids),
+            ],
+        ]);
+
+        if ($response->failed()) {
+            throw new ProfileWasNotFoundException('Unable load profiles by IDs.');
+        }
+
+        return $this->transformArrayToProfiles($response->data());
+    }
+
+    /**
      * Загружает профиль по ID пользователя.
      *
      * @param int $userId
@@ -93,6 +117,68 @@ class BillingService extends AbstractService implements BillingServiceContract, 
         }
 
         return new BillingProfile($this->api, $response->data());
+    }
+
+    /**
+     * Загружает несколько профилей по ID пользователей.
+     *
+     * @param array $userIds
+     *
+     * @throws \Celestial\Exceptions\Services\Billing\ProfileWasNotFoundException
+     *
+     * @return \Celestial\Services\Billing\BillingProfile
+     */
+    public function getProfilesByUserIds(array $userIds)
+    {
+        $response = $this->api->request('GET', '/users', [
+            'query' => [
+                'user_ids' => $this->transformArrayToIdsList($userIds),
+            ],
+        ]);
+
+        if ($response->failed()) {
+            throw new ProfileWasNotFoundException('Unable load profiles by user IDs.');
+        }
+
+        return $this->transformArrayToProfiles($response->data());
+    }
+
+    /**
+     * Преобразует список профилей в объекты.
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+    protected function transformArrayToProfiles(array $data)
+    {
+        $profiles = [];
+
+        foreach ($data as $item) {
+            $profiles[] = new BillingProfile($this->api, $item);
+        }
+
+        return $profiles;
+    }
+
+    /**
+     * Приводит массив ID к integer, отсекает нули и склеивает оставшиеся значения запятыми.
+     *
+     * @param array $ids
+     *
+     * @return string
+     */
+    protected function transformArrayToIdsList(array $ids)
+    {
+        $ids = array_map(function ($id) {
+            return intval($id);
+        }, $ids);
+
+        $ids = array_filter($ids, function ($id) {
+            return $id > 0;
+        });
+
+        return implode(',', $ids);
     }
 
     /**

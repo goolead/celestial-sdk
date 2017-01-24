@@ -89,4 +89,24 @@ class PaymentsService extends AbstractService implements PaymentsServiceContract
             'payment_url' => $paymentUrl,
         ]);
     }
+
+    /**
+     * Выполняет попытку провести рекуррентный платеж для переданного пользователя.
+     *
+     * @param int $userId
+     * @param int $amount = 0
+     *
+     * @return array
+     */
+    public function processRecurrentPayment(int $userId, int $amount = 0)
+    {
+        $response = $this->api->request('POST', '/payments/rebill', [
+            'form_params' => [
+                'user_id' => $userId,
+                'amount' => $amount,
+            ],
+        ]);
+
+        return $response->data();
+    }
 }
