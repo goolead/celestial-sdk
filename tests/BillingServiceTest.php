@@ -112,4 +112,28 @@ class BillingServiceTest extends Requests
 
         $profile = $service->getProfileByUserId(2);
     }
+
+    /** @test */
+    function it_should_detect_if_profile_subscription_is_expired()
+    {
+        $api = ServicesTestsHelper::mockApi(function ($api) {
+            $request = $this->getProfileByUserIdRequest([
+                'subscription' => [
+                    'expired' => 1,
+                    'trial' => 1,
+                ],
+            ]);
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'])
+                ->andReturn($request['response']);
+        });
+
+        $service = new BillingService($api);
+
+        $profile = $service->getProfileByUserId(1);
+
+        $this->assertTrue($profile->isSubscriptionExpired());
+        $this->assertFalse($profile->isOnTrial());
+    }
 }

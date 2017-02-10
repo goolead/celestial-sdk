@@ -235,7 +235,7 @@ class BillingProfile implements BillingProfileContract
      */
     public function isOnTrial(): bool
     {
-        return intval($this->data['subscription']['is_trial'] ?? 0) === 1;
+        return intval($this->data['subscription']['is_trial'] ?? 0) === 1 && !$this->isSubscriptionExpired();
     }
 
     /**
@@ -245,7 +245,17 @@ class BillingProfile implements BillingProfileContract
      */
     public function isOnGrace(): bool
     {
-        return intval($this->data['subscription']['is_grace'] ?? 0) === 1;
+        return intval($this->data['subscription']['is_grace'] ?? 0) === 1 && !$this->isSubscriptionExpired();
+    }
+
+    /**
+     * Проверяет, истекла ли подписка у профиля.
+     *
+     * @return bool
+     */
+    public function isSubscriptionExpired(): bool
+    {
+        return intval($this->data['subscription']['is_expired'] ?? 0) === 1;
     }
 
     /**

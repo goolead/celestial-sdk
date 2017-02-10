@@ -330,6 +330,7 @@ class Requests extends PHPUnit_Framework_TestCase
     protected function profileData(array $profileParams = [])
     {
         $balance = intval($profileParams['balance'] ?? 0);
+        $subscription = $profileParams['subscription'] ?? [];
 
         return [
             'success' => 1,
@@ -342,7 +343,7 @@ class Requests extends PHPUnit_Framework_TestCase
                     'raw' => $balance,
                     'formatted' => ($balance / 100).' руб.',
                 ],
-                'subscription' => $this->subscriptionData(),
+                'subscription' => $this->subscriptionData($subscription),
                 'created_at' => [
                     'date' => '2030-01-01 00:00:00.000000',
                     'timezone_type' => 3,
@@ -358,6 +359,8 @@ class Requests extends PHPUnit_Framework_TestCase
         $planId = intval($subscriptionParams['plan_id'] ?? 1);
         $planPeriod = $subscriptionParams['plan_period'] ?? 'monthly';
         $isTrial = intval($subscriptionParams['trial'] ?? 0);
+        $isGrace = intval($subscriptionParams['grace'] ?? 0);
+        $isExpired = intval($subscriptionParams['expired'] ?? 0);
         $planPrice = intval($subscriptionParams['plan_price'] ?? 0);
         $endsAtRaw = $subscriptionParams['ends_at_raw'] ?? '2030-01-01 00:00:00';
 
@@ -367,7 +370,8 @@ class Requests extends PHPUnit_Framework_TestCase
             'plan_id' => $planId,
             'period' => $planPeriod,
             'is_trial' => $isTrial,
-            'is_grace' => 0,
+            'is_grace' => $isGrace,
+            'is_expired' => $isExpired,
             'ends_at' => '1 янв. 2030 г.',
             'ends_at_raw' => $endsAtRaw,
             'grace' => [

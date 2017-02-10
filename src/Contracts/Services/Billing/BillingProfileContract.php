@@ -132,6 +132,13 @@ interface BillingProfileContract
     public function isOnGrace(): bool;
 
     /**
+     * Проверяет, истекла ли подписка у профиля.
+     *
+     * @return bool
+     */
+    public function isSubscriptionExpired(): bool;
+
+    /**
      * Выполняет переход профиля на другой тарифный план.
      *
      * @param \Celestial\Contracts\Services\Payments\PaymentsServiceContract $payments
