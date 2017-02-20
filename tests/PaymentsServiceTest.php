@@ -125,6 +125,112 @@ class PaymentsServiceTest extends PHPUnit_Framework_TestCase
         $payments->createWebhook($actorType, $actorId, $event, $webhookUrl);
     }
 
+    /** @test */
+    function it_should_check_if_user_has_recurrent_payment_session()
+    {
+        $userId = 1;
+        $api = ServicesTestsHelper::mockApi(function ($api) use ($userId) {
+            $request = $this->getCheckRecurrentSessionRequest(true, $userId);
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'], $request['params'])
+                ->andReturn($request['response']);
+        });
+
+        $payments = new PaymentsService($api);
+
+        $result = $payments->hasRecurrentSession($userId);
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    function it_should_check_if_user_has_not_recurrent_payment_session()
+    {
+        $userId = 1;
+        $api = ServicesTestsHelper::mockApi(function ($api) use ($userId) {
+            $request = $this->getCheckRecurrentSessionRequest(false, $userId);
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'], $request['params'])
+                ->andReturn($request['response']);
+        });
+
+        $payments = new PaymentsService($api);
+
+        $result = $payments->hasRecurrentSession($userId);
+        $this->assertFalse($result);
+    }
+
+    /** @test */
+    function it_should_delete_recurrent_payment_sessions()
+    {
+        $userId = 1;
+
+        $api = ServicesTestsHelper::mockApi(function ($api) use ($userId) {
+            $request = $this->getDeleteRecurrentSessionRequest($userId);
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'], $request['params'])
+                ->andReturn($request['response']);
+        });
+
+        $payments = new PaymentsService($api);
+
+        $result = $payments->deleteRecurrentSession($userId);
+        $this->assertTrue($result);
+    }
+
+    protected function getDeleteRecurrentSessionRequest($userId)
+    {
+        return [
+            'method' => 'DELETE',
+            'url' => '/payments/recurrent',
+            'params' => [
+                'query' => [
+                    'user_id' => $userId,
+                ],
+            ],
+            'response' => ServicesTestsHelper::toApiResponse([
+                'success' => 1,
+                'data' => 1,
+            ]),
+        ];
+    }
+
+    protected function getCheckRecurrentSessionRequest($result, $userId)
+    {
+        $response = [
+            'success' => 1,
+            'data' => [
+                'id' => 1,
+                'session_id' => 1,
+                'amount' => 10000,
+                'currency' => 'rub',
+                'rebilled_at' => '2017-01-01 00:00:01',
+                'created_at' => '2017-01-01 00:00:01',
+                'updated_at' => '2017-01-01 00:00:01',
+            ],
+        ];
+
+        $statusCode = 200;
+
+        if ($result === false) {
+            $response = ['error' => 404];
+            $statusCode = 404;
+        }
+
+        return [
+            'method' => 'GET',
+            'url' => '/payments/recurrent',
+            'params' => [
+                'query' => [
+                    'user_id' => $userId,
+                ],
+            ],
+            'response' => ServicesTestsHelper::toApiResponse($response, $statusCode),
+        ];
+    }
+
     protected function getPaymentSessionInitRequest()
     {
         return [

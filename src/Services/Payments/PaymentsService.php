@@ -109,4 +109,58 @@ class PaymentsService extends AbstractService implements PaymentsServiceContract
 
         return $response->data();
     }
+
+    /**
+     * Проверяет, есть ли у пользователя активная рекуррентная сессия.
+     *
+     * @param int $userId
+     *
+     * @return bool
+     */
+    public function hasRecurrentSession(int $userId): bool
+    {
+        $recurrentSession = $this->recurrentSessionFor($userId);
+
+        return !is_null($recurrentSession);
+    }
+
+    /**
+     * Возвращает активную рекуррентную сессию для выбранного пользователя.
+     *
+     * @param int $userId
+     *
+     * @return array|null
+     */
+    public function recurrentSessionFor(int $userId)
+    {
+        $response = $this->api->request('GET', '/payments/recurrent', [
+            'query' => [
+                'user_id' => $userId,
+            ],
+        ]);
+
+        if ($response->requestFailed()) {
+            return;
+        }
+
+        return $response->data();
+    }
+
+    /**
+     * Удаляет сохраненную рекуррентную сессию пользователя.
+     *
+     * @param int $userId
+     *
+     * @return bool
+     */
+    public function deleteRecurrentSession(int $userId): bool
+    {
+        $response = $this->api->request('DELETE', '/payments/recurrent', [
+            'query' => [
+                'user_id' => $userId,
+            ],
+        ]);
+
+        return !$response->requestFailed();
+    }
 }
