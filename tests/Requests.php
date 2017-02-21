@@ -179,6 +179,7 @@ class Requests extends PHPUnit_Framework_TestCase
                     'period' => 'monthly',
                     'trial' => 0,
                     'ends_at' => null,
+                    'discount' => null,
                 ],
             ],
             'response' => ServicesTestsHelper::toApiResponse($this->profileData()),
