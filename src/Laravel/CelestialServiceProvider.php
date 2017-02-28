@@ -11,6 +11,17 @@ use Illuminate\Support\ServiceProvider;
 
 class CelestialServiceProvider extends ServiceProvider
 {
+    public function boot()
+    {
+        if (strpos($this->app->version(), 'Lumen') !== false) {
+            return;
+        }
+
+        $this->publishes([
+            __DIR__.'/../../config/celestial.php' => config_path('celestial.php'),
+        ]);
+    }
+
     public function register()
     {
         $this->registerBillingService();
